@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- title -->
+    <title>Websocket</title>
+</head>
+
+<body>
+
+    <h3>Request Format：</h3> <br>
+    <textarea id="rf" name='rf' rowebsocket="80" cols="80"></textarea>
+    <button onclick="sendRequestMessage();">Request</button>
+
+    <h3>Websocket Response</h3>
+    <p id='message' name='message'></p>
+</body>
+<script type="text/javascript">
+    var websocket = null;
+
+    if ("WebSocket" in window) {
+        alert("Your browser supports WebSocket!");
+
+        creatWebsocket();
+
+    } else {
+        // The browser does not support WebSockets
+        alert("Your browser does not support WebSockets!");
+    }
+
+    // Create a WebSocket connection
+    function creatWebsocket() {
+
+        // Open a Web socket
+        websocket = new WebSocket('wss://portal-datahub-datahub-eks008.sa.wise-paas.com:443');
+
+        //After the connection is successfully established, send the message
+        websocket.onopen = function () {
+
+            alert("WebSocket connection successful");
+
+        }
+
+        //The received message is displayed on the page
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //Reinitiate a connection when a connection error occurs
+        websocket.onerror = function () {
+
+            alert("A WebSocket connection error occurred. Please reconnect");
+            creatWebsocket(); 
+
+        }
+
+        //Connection is closed
+        websocket.onclose = function () {
+
+            alert("The WebSocket connection is closed");
+
+        }
+
+    }
+
+
+    // Send request information
+    function sendRequestMessage() {
+
+        var RequestMessage = document.getElementById("rf").value; // Get the request information in the textarea
+        if (RequestMessage != '' && RequestMessage != null) {
+
+            websocket.send(RequestMessage); // Send request information
+
+        } else {
+
+            alert("The request parameter cannot be null");
+
+        }
+
+    }
+
+
+    /* Monitor window closing events. When the window is closed, 
+    take the initiative to close the WebSocket connection to prevent 
+    the window being closed before the connection is disconnected, 
+    and the server side will throw exceptions.
+    */
+    window.onbeforeunload = function () {
+        closeWebSocket();
+    }
+
+    //Close the WebSocket connection
+    function closeWebSocket() {
+        websocket.close();
+    }
+    //Displays the message on the web page
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+</script>
+
+</html>
